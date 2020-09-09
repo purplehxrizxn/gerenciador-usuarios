@@ -43,41 +43,30 @@ class UserController{
             this.getPhoto(this.formUpdateEl).then((content) => {
 
                 if(!values.photo){
-                    result._photo = userOld._photo
+                    result._photo = userOld._photo;
                 } else {
-
-                    result._photo = content
-
+                    result._photo = content;
                 }
 
-                tr.dataset.user = JSON.stringify(result)
+                let user = new User();
 
-                tr.innerHTML = `
-            
-                <td><img src="${result._photo}" alt="User Image" class="img-circle img-sm"></td>
-                <td>${result._name}</td>
-                <td>${result._email}</td>
-                <td>${(result._admin) ? 'Sim' : 'Não'}</td>
-                <td>${Utils.dateFormat(result._register)}</td>
-                <td>
-                    <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
-                    <button type="button" class="btn btn-danger btn-xs btn-flat">Excluir</button>
-                </td>
-                `
+                user.loadFromJSON(result);
+
+                user.save();
+
+                this.getTr(user, tr);
     
-                this.addEventsTr(tr)
-    
-                this.updateCount()
+                this.updateCount();
                 
-                this.formUpdateEl.reset()
+                this.formUpdateEl.reset();
 
-                btn.disabled = false
+                btn.disabled = false;
 
-                this.showPanelCreate()
+                this.showPanelCreate();
 
             }, (e) => {
 
-                console.error(e)
+                console.error(e);
 
             })
 
@@ -101,19 +90,19 @@ class UserController{
 
             this.getPhoto(this.formEl).then((content) => {
 
-                values.photo = content
+                values.photo = content;
 
-                this.insert(values)
+                values.save();
 
-                this.addLine(values)
+                this.addLine(values);
 
-                this.formEl.reset()
+                this.formEl.reset();
 
-                btn.disabled = false
+                btn.disabled = false;
 
             }, (e) => {
 
-                console.error(e)
+                console.error(e);
 
             })
 
@@ -197,23 +186,9 @@ class UserController{
 
         }
 
-        getUsersStorage(){
-
-            let users = []
-
-            if(localStorage.getItem("users")) {
-
-                users = JSON.parse(localStorage.getItem("users"))
-
-            }
-
-            return users;
-
-        }
-
         selectAll(){
 
-            let users = this.getUsersStorage()
+            let users = User.getUsersStorage()
 
             users.forEach(dataUser => {
 
@@ -227,24 +202,26 @@ class UserController{
 
         }
 
-        insert(data){
+    addLine(dataUser){   
 
-            let users = this.getUsersStorage()
+        let tr = this.getTr(dataUser);
 
-            users.push(data)
+        this.tableEl.appendChild(tr);
 
-            localStorage.setItem("users", JSON.stringify(users))
+        this.updateCount();
+    }
+
+    getTr(dataUser, tr = null){
+
+        if(tr === null){
+
+            tr = document.createElement('tr');
 
         }
 
-    addLine(dataUser){
-
-        let tr = document.createElement('tr')      
-
-        tr.dataset.user = JSON.stringify(dataUser)
+        tr.dataset.user = JSON.stringify(dataUser);
 
         tr.innerHTML = `
-        
             <td><img src="${dataUser.photo}" alt="User Image" class="img-circle img-sm"></td>
             <td>${dataUser.name}</td>
             <td>${dataUser.email}</td>
@@ -254,13 +231,12 @@ class UserController{
                 <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
                 <button type="button" class="btn btn-danger btn-delete btn-xs btn-flat">Excluir</button>
             </td>
-        
-        `
-        this.addEventsTr(tr)
+        `;
 
-        this.tableEl.appendChild(tr)
+        this.addEventsTr(tr);
 
-        this.updateCount()
+        return tr;
+
     }
 
     addEventsTr(tr){
@@ -269,8 +245,15 @@ class UserController{
 
             if (confirm("Deseja realmente excluir?")){
 
-                tr.remove()
-                this.updateCount()
+                let user = new User();
+
+                user.loadFromJSON(JSON.parse(tr.dataset.user));
+
+                user.remove();
+
+                tr.remove();
+
+                this.updateCount();
 
             }
 

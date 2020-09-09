@@ -2,6 +2,7 @@ class User {
 
     constructor(name, gender, birth, country, email, password, photo, admin){
 
+        this._id;
         this._name = name
         this._gender = gender
         this._birth = birth
@@ -12,6 +13,10 @@ class User {
         this._admin = admin
         this._register = new Date()
 
+    }
+
+    get id(){
+        return this._id
     }
 
     get register(){
@@ -63,6 +68,88 @@ class User {
             }
 
         }
+
+    }
+
+    static getUsersStorage(){
+
+        let users = []
+
+        if(localStorage.getItem("users")) {
+
+            users = JSON.parse(localStorage.getItem("users"))
+
+        }
+
+        return users;
+
+    }
+
+    getNewId(){
+
+        let usersId = parseInt(localStorage.getItem("usersId"));
+
+        if(!usersId > 0){
+
+            usersId = 0;
+
+        }
+
+        usersId++;
+
+        localStorage.setItem("usersId", usersId);
+
+        return usersId;
+
+    }
+
+    save(){
+
+        let users = User.getUsersStorage()
+
+        if(this.id > 0) {
+
+            // map pega um elemento do array e "já troca"
+            users.map(u => {
+
+                if(u._id == this.id){
+
+                    Object.assign(u, this);
+
+                }
+
+                return u;
+
+            })
+
+        } else {
+
+            this._id = this.getNewId();
+            
+            users.push(this)
+
+        }
+
+        // toda vez que existir alguma coisa que tem que ser colocada no if e no else, colocar depois do if-else
+        localStorage.setItem("users", JSON.stringify(users))
+
+    }
+
+    remove(){
+
+        let users = User.getUsersStorage();
+
+        users.forEach((userData, index) => {
+
+            if (this._id == userData._id){
+
+                users.splice(index, 1);
+
+            }
+
+        })
+
+        localStorage.setItem("users", JSON.stringify(users))
 
     }
 
