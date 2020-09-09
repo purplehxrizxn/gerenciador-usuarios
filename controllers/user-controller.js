@@ -13,6 +13,8 @@ class UserController{
     onEdit(){
 
         document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e =>{
+            
+            e.preventDefault()
 
             this.showPanelCreate()
 
@@ -151,7 +153,38 @@ class UserController{
         `
         tr.querySelector(".btn-edit").addEventListener("click", e =>{
 
-            console.log(JSON.parse(tr.dataset.user))
+            let json = JSON.parse(tr.dataset.user)
+            let form = document.querySelector("#form-user-update");
+
+            for(let name in json) {
+
+                let field = form.querySelector("[name=" + name.replace("_", "") + "]")
+
+                if(field){  
+
+                    switch(field.type){
+
+                        case 'file':
+                            continue
+                            break;
+
+                        case 'radio':
+                            field = form.querySelector("[name=" + name.replace("_", "") + "][value=" + json[name] + "]")
+                            field.checked = true
+                            break;
+
+                        case 'checkbox':
+                            field.checked = json[name]
+                            break;
+
+                            default:
+                                field.value = json[name]
+
+                    }
+
+                }
+
+            }
         
             this.showPanelUpdate()
 
@@ -166,6 +199,7 @@ class UserController{
 
         document.querySelector("#box-user-create").style.display = "block"
         document.querySelector("#box-user-update").style.display = "none"
+        
 
     }
 
